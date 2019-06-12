@@ -1,6 +1,6 @@
 # ExTodo
 
-**TODO: Add description**
+NOT READY FOR USE
 
 ## Installation
 
@@ -19,3 +19,4 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/ex_todo](https://hexdocs.pm/ex_todo).
 
+Inspiration drawn from https://www.npmjs.com/package/leasot
