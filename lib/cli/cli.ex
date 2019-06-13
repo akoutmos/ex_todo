@@ -36,6 +36,7 @@ defmodule ExTodo.CLI do
     end)
     |> output_report()
     |> output_summary(config)
+    |> return_result(config)
   end
 
   defp get_all_files(config) do
@@ -155,6 +156,10 @@ defmodule ExTodo.CLI do
       acc
       |> Map.update(entry.type, 1, &(&1 + 1))
     end)
+    |> Map.to_list()
+    |> Enum.sort(fn {keyword_1, _}, {keyword_2, _} ->
+      keyword_1 <= keyword_2
+    end)
     |> Enum.each(fn {keyword, count} ->
       if keyword in config.keyword_errors do
         type =
@@ -167,7 +172,7 @@ defmodule ExTodo.CLI do
           |> OutputUtils.gen_fixed_width_string(10, 1)
           |> OutputUtils.red_text()
 
-        IO.error("#{type}#{count}")
+        IO.info("#{type}#{count}")
       else
         type =
           "  #{keyword}"
@@ -182,5 +187,21 @@ defmodule ExTodo.CLI do
         IO.info("#{type}#{count}")
       end
     end)
+
+    entries
+  end
+
+  defp return_result(entries, config) do
+    found_errors =
+      entries
+      |> Enum.map(fn files ->
+        files.todo_entries
+      end)
+      |> List.flatten()
+      |> Enum.find_value(false, fn %TodoEntry{type: type} ->
+        type in config.keyword_errors
+      end)
+
+    not found_errors
   end
 end
