@@ -17,6 +17,10 @@ defmodule ExTodo.OutputUtils do
     ANSI.white() <> text <> ANSI.reset()
   end
 
+  def red_text(text) do
+    ANSI.red() <> text <> ANSI.reset()
+  end
+
   def light_cyan_text(text) do
     ANSI.light_cyan() <> text <> ANSI.reset()
   end

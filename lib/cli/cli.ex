@@ -35,6 +35,7 @@ defmodule ExTodo.CLI do
       entry_1.file_path >= entry_2.file_path
     end)
     |> output_report()
+    |> output_summary(config)
   end
 
   defp get_all_files(config) do
@@ -72,33 +73,35 @@ defmodule ExTodo.CLI do
   end
 
   defp get_lines_with_todos([current_line | tail], config, line_num, acc) do
-    keyword_in_line =
-      Enum.find(config.supported_keywords, nil, fn keyword ->
+    fuzzy_match_list =
+      config.supported_keywords
+      |> Enum.map(fn keyword ->
+        [
+          {keyword, "#{keyword}:"},
+          {keyword, "#{keyword} :"},
+          {keyword, "#{keyword}-"},
+          {keyword, "#{keyword} -"},
+          {keyword, keyword}
+        ]
+      end)
+      |> List.flatten()
+
+    {original, keyword_in_line} =
+      Enum.find(fuzzy_match_list, {:not_found, :not_found}, fn {_original, keyword} ->
         String.contains?(current_line, keyword)
       end)
 
     acc =
-      cond do
-        keyword_in_line != nil and String.contains?(current_line, "#{keyword_in_line}:") ->
-          comment =
-            current_line
-            |> String.split("#{keyword_in_line}:")
-            |> Enum.at(1)
-            |> String.trim()
+      if keyword_in_line != :not_found do
+        comment =
+          current_line
+          |> String.split(keyword_in_line, parts: 2)
+          |> Enum.at(1)
+          |> String.trim()
 
-          [%TodoEntry{type: keyword_in_line, line: line_num, comment: comment} | acc]
-
-        keyword_in_line != nil and String.contains?(current_line, keyword_in_line) ->
-          comment =
-            current_line
-            |> String.split(keyword_in_line)
-            |> Enum.at(1)
-            |> String.trim()
-
-          [%TodoEntry{type: keyword_in_line, line: line_num, comment: comment} | acc]
-
-        true ->
-          acc
+        [%TodoEntry{type: original, line: line_num, comment: comment} | acc]
+      else
+        acc
       end
 
     get_lines_with_todos(tail, config, line_num + 1, acc)
@@ -132,6 +135,52 @@ defmodule ExTodo.CLI do
       end)
 
       IO.info("")
+    end)
+
+    entries
+  end
+
+  defp output_summary(entries, config) do
+    "ExTodo Scan Summary"
+    |> OutputUtils.blue_text()
+    |> OutputUtils.underline_text()
+    |> IO.info()
+
+    entries
+    |> Enum.map(fn files ->
+      files.todo_entries
+    end)
+    |> List.flatten()
+    |> Enum.reduce(%{}, fn entry, acc ->
+      acc
+      |> Map.update(entry.type, 1, &(&1 + 1))
+    end)
+    |> Enum.each(fn {keyword, count} ->
+      if keyword in config.keyword_errors do
+        type =
+          "  #{keyword}"
+          |> OutputUtils.gen_fixed_width_string(10, 1)
+          |> OutputUtils.red_text()
+
+        count =
+          count
+          |> OutputUtils.gen_fixed_width_string(10, 1)
+          |> OutputUtils.red_text()
+
+        IO.error("#{type}#{count}")
+      else
+        type =
+          "  #{keyword}"
+          |> OutputUtils.gen_fixed_width_string(10, 1)
+          |> OutputUtils.green_text()
+
+        count =
+          count
+          |> OutputUtils.gen_fixed_width_string(10, 1)
+          |> OutputUtils.green_text()
+
+        IO.info("#{type}#{count}")
+      end
     end)
   end
 end

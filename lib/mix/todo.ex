@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Todo do
   @doc """
   This Mix task generates a Doctor report of the project.
   """
-  def run(args) do
+  def run(_args) do
     result =
       Config.config_file()
       |> load_config_file()
