@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.ExTodo.Gen.Config do
+defmodule Mix.Tasks.Todo.Gen.Config do
   @moduledoc false
 
   use Mix.Task

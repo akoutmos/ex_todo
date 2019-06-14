@@ -8,6 +8,7 @@ defmodule ExTodo.CodetagEntry do
 
   defstruct ~w(type line comment)a
 
+  @doc "Build a single codetag entry"
   def build(type, line, comment) do
     %CodetagEntry{
       type: type,

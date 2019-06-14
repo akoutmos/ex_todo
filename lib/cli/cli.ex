@@ -2,6 +2,7 @@ defmodule ExTodo.CLI do
   alias ExTodo.{Config, FileSummary, FileUtils, OutputUtils, CodetagEntry}
   alias Mix.Shell.IO
 
+  @doc "Given a config, run the codetags report"
   def run_report(%Config{} = config) do
     config
     |> FileUtils.get_all_files()
@@ -10,8 +11,8 @@ defmodule ExTodo.CLI do
     |> Enum.map(fn {path, file_codetags} ->
       FileSummary.build(path, file_codetags)
     end)
-    |> Enum.sort(fn entry_1, entry_2 ->
-      entry_1.file_path >= entry_2.file_path
+    |> Enum.sort(fn file_summary_1, file_summary_2 ->
+      file_summary_1.file_path <= file_summary_2.file_path
     end)
     |> output_report()
     |> output_summary(config)

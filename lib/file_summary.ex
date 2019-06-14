@@ -8,9 +8,7 @@ defmodule ExTodo.FileSummary do
 
   defstruct file_path: nil, todo_entries: []
 
-  # FIXME: This is a test
-  # TODO This is another test
-  # HACK: Cool man
+  @doc "Build a file summary sruct"
   def build(file_path, todo_entries) do
     %FileSummary{
       file_path: file_path,

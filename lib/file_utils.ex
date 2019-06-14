@@ -7,16 +7,17 @@ defmodule ExTodo.FileUtils do
 
   @glob_pattern "./**"
 
-  @doc ""
+  @doc "Get all of the files according to the fileglob"
   def get_all_files(%Config{} = config, file_glob \\ @glob_pattern) do
     file_glob
     |> Path.wildcard(match_dot: true)
     |> Enum.reject(fn entry ->
-      path_in_ignore_list?(entry, config.skip_directories) or not_file?(entry)
+      path_in_ignore_list?(entry, config.skip_directories) or not_file?(entry) or
+        file_in_ignore_list?(entry, config.skip_files)
     end)
   end
 
-  @doc ""
+  @doc "Read the contents of all the files in the provided list"
   def read_file_list_contents(file_list) do
     file_list
     |> Enum.reduce([], fn file_path, acc ->
@@ -32,7 +33,7 @@ defmodule ExTodo.FileUtils do
     end)
   end
 
-  @doc ""
+  @doc "Get all of the codetags within the list of files given the config settings"
   def get_file_list_codetags(file_contents_list, %Config{} = config) do
     file_contents_list
     |> Enum.reduce([], fn {file_path, file_contents}, acc ->
@@ -52,6 +53,12 @@ defmodule ExTodo.FileUtils do
   defp path_in_ignore_list?(path, skip_directories) do
     Enum.find_value(skip_directories, false, fn skip_directory ->
       String.starts_with?(path, skip_directory)
+    end)
+  end
+
+  defp file_in_ignore_list?(path, skip_files) do
+    Enum.find_value(skip_files, false, fn skip_file ->
+      String.ends_with?(path, skip_file)
     end)
   end
 

@@ -6,30 +6,37 @@ defmodule ExTodo.OutputUtils do
 
   alias Elixir.IO.ANSI
 
+  @doc "Underline the provided text"
   def underline_text(text) do
     ANSI.underline() <> text <> ANSI.reset()
   end
 
+  @doc "Make the provided text green"
   def green_text(text) do
     ANSI.green() <> text <> ANSI.reset()
   end
 
+  @doc "Make the provided text blue"
   def blue_text(text) do
     ANSI.blue() <> text <> ANSI.reset()
   end
 
+  @doc "Make the provided text white"
   def white_text(text) do
     ANSI.white() <> text <> ANSI.reset()
   end
 
+  @doc "Make the provided text red"
   def red_text(text) do
     ANSI.red() <> text <> ANSI.reset()
   end
 
+  @doc "Make the provided text ligth cyan"
   def light_cyan_text(text) do
     ANSI.light_cyan() <> text <> ANSI.reset()
   end
 
+  @doc "Format a string to be of a certain width and have a certain padding"
   def gen_fixed_width_string(value, width, padding \\ 2)
 
   def gen_fixed_width_string(value, width, padding) when is_integer(value) do
