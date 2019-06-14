@@ -1,111 +1,21 @@
 defmodule ExTodo.CLI do
-  alias ExTodo.{Config, FileSummary, OutputUtils, TodoEntry}
+  alias ExTodo.{Config, FileSummary, FileUtils, OutputUtils, CodetagEntry}
   alias Mix.Shell.IO
-
-  @glob_pattern "./**"
 
   def run_report(%Config{} = config) do
     config
-    |> get_all_files()
-    |> Enum.map(fn file_path ->
-      file_path
-      |> File.read()
-      |> handle_file_read(file_path)
-    end)
-    |> Enum.reject(fn
-      :error -> true
-      _ -> false
-    end)
-    |> Enum.map(fn {:ok, file_contents, path} ->
-      file_todos =
-        file_contents
-        |> String.split("\n")
-        |> get_lines_with_todos(config)
-
-      {path, file_todos}
-    end)
-    |> Enum.reject(fn
-      {_path, []} -> true
-      _ -> false
-    end)
-    |> Enum.map(fn {path, file_todos} ->
-      FileSummary.build(path, file_todos)
+    |> FileUtils.get_all_files()
+    |> FileUtils.read_file_list_contents()
+    |> FileUtils.get_file_list_codetags(config)
+    |> Enum.map(fn {path, file_codetags} ->
+      FileSummary.build(path, file_codetags)
     end)
     |> Enum.sort(fn entry_1, entry_2 ->
       entry_1.file_path >= entry_2.file_path
     end)
     |> output_report()
     |> output_summary(config)
-    |> return_result(config)
-  end
-
-  defp get_all_files(config) do
-    @glob_pattern
-    |> Path.wildcard(match_dot: true)
-    |> Enum.reject(fn entry ->
-      path_in_ignore_list?(entry, config.skip_directories) or not_file?(entry)
-    end)
-  end
-
-  defp path_in_ignore_list?(path, skip_directories) do
-    Enum.find_value(skip_directories, false, fn skip_directory ->
-      String.starts_with?(path, skip_directory)
-    end)
-  end
-
-  defp not_file?(path), do: not File.regular?(path)
-
-  defp handle_file_read({:error, reason}, file_path) do
-    IO.info("Could not read #{file_path} for reason: #{inspect(reason)}")
-
-    :error
-  end
-
-  defp handle_file_read({:ok, file_contents}, path) do
-    {:ok, file_contents, path}
-  end
-
-  defp get_lines_with_todos(file_contents, config) do
-    get_lines_with_todos(file_contents, config, 1, [])
-  end
-
-  defp get_lines_with_todos([], _config, _line_num, acc) do
-    Enum.reverse(acc)
-  end
-
-  defp get_lines_with_todos([current_line | tail], config, line_num, acc) do
-    fuzzy_match_list =
-      config.supported_keywords
-      |> Enum.map(fn keyword ->
-        [
-          {keyword, "#{keyword}:"},
-          {keyword, "#{keyword} :"},
-          {keyword, "#{keyword}-"},
-          {keyword, "#{keyword} -"},
-          {keyword, keyword}
-        ]
-      end)
-      |> List.flatten()
-
-    {original, keyword_in_line} =
-      Enum.find(fuzzy_match_list, {:not_found, :not_found}, fn {_original, keyword} ->
-        String.contains?(current_line, keyword)
-      end)
-
-    acc =
-      if keyword_in_line != :not_found do
-        comment =
-          current_line
-          |> String.split(keyword_in_line, parts: 2)
-          |> Enum.at(1)
-          |> String.trim()
-
-        [%TodoEntry{type: original, line: line_num, comment: comment} | acc]
-      else
-        acc
-      end
-
-    get_lines_with_todos(tail, config, line_num + 1, acc)
+    |> report_result(config)
   end
 
   defp output_report([]) do
@@ -141,7 +51,7 @@ defmodule ExTodo.CLI do
     entries
   end
 
-  defp output_summary(entries, config) do
+  defp output_summary(entries, %Config{} = config) do
     "ExTodo Scan Summary"
     |> OutputUtils.blue_text()
     |> OutputUtils.underline_text()
@@ -161,7 +71,7 @@ defmodule ExTodo.CLI do
       keyword_1 <= keyword_2
     end)
     |> Enum.each(fn {keyword, count} ->
-      if keyword in config.keyword_errors do
+      if keyword in config.error_codetags do
         type =
           "  #{keyword}"
           |> OutputUtils.gen_fixed_width_string(10, 1)
@@ -191,15 +101,15 @@ defmodule ExTodo.CLI do
     entries
   end
 
-  defp return_result(entries, config) do
+  defp report_result(entries, %Config{} = config) do
     found_errors =
       entries
       |> Enum.map(fn files ->
         files.todo_entries
       end)
       |> List.flatten()
-      |> Enum.find_value(false, fn %TodoEntry{type: type} ->
-        type in config.keyword_errors
+      |> Enum.find_value(false, fn %CodetagEntry{type: type} ->
+        type in config.error_codetags
       end)
 
     not found_errors

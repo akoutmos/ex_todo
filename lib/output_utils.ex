@@ -1,4 +1,9 @@
 defmodule ExTodo.OutputUtils do
+  @moduledoc """
+  This module is used to format strings for STDOUT so that reports are easy
+  to read.
+  """
+
   alias Elixir.IO.ANSI
 
   def underline_text(text) do

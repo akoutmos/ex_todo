@@ -8,8 +8,8 @@ defmodule ExTodo.Config do
 
   alias __MODULE__
 
-  defstruct supported_keywords: ~w(NOTE TODO FIXME HACK BUG),
-            keyword_errors: ~w(FIXME BUG),
+  defstruct supported_codetags: ~w(NOTE TODO FIXME HACK BUG),
+            error_codetags: ~w(FIXME BUG),
             skip_files: ~w(),
             skip_directories: ~w(.git _build deps cover docs)
 

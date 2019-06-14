@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Todo do
   @shortdoc "Find TODO, FIXME, NOTE, etc throughout your codebase"
 
   @doc """
-  This Mix task generates a Doctor report of the project.
+  This Mix task generates a ExTodo report of the project.
   """
   def run(_args) do
     result =
