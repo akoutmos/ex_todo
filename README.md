@@ -34,4 +34,4 @@ To generate a `.todo.exs` config file with defaults, run: `mix todo.gen.config`
 
 By running `mix todo` in this repo we get:
 
-<img src="https://github.com/akoutmos/ex_todo/raw/master/sample_out.jpg" alt="ExTodo">
+<img src="https://raw.githubusercontent.com/akoutmos/ex_todo/master/sample_output.jpg" alt="ExTodo">
