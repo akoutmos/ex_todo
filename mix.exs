@@ -6,9 +6,16 @@ defmodule ExTodo.MixProject do
       app: :ex_todo,
       version: "0.1.0",
       elixir: "~> 1.7",
-      start_permanent: Mix.env() == :prod,
+      name: "ExTodo",
+      source_url: "https://github.com/akoutmos/ex_todo",
+      homepage_url: "https://hex.pm/packages/ex_todo",
+      description: "A simple utility to find codetags within a project",
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps(),
+      start_permanent: Mix.env() == :prod,
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ],
       package: package()
     ]
   end
@@ -30,8 +37,4 @@ defmodule ExTodo.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/sample_files"]
   defp elixirc_paths(_), do: ["lib"]
-
-  defp deps do
-    []
-  end
 end
