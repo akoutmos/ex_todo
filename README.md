@@ -6,7 +6,7 @@ A simple utility to keep track of codetags in your project. The list of codetags
 
 ExTodo works on all file formats and can be given a list of regular expressions for files/paths that should be skipped.
 
-Inspiration for output taken from https://www.npmjs.com/package/leasot
+Inspiration for output taken from [https://www.npmjs.com/package/leasot](https://www.npmjs.com/package/leasot)
 
 ## Installation
 

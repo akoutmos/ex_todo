@@ -16,7 +16,8 @@ defmodule ExTodo.MixProject do
         main: "readme",
         extras: ["README.md"]
       ],
-      package: package()
+      package: package(),
+      deps: deps()
     ]
   end
 
@@ -37,4 +38,10 @@ defmodule ExTodo.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/sample_files"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp deps do
+    [
+      {:ex_doc, ">= 0.0.0"}
+    ]
+  end
 end
