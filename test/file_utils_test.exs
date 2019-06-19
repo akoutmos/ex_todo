@@ -24,7 +24,7 @@ defmodule FilUtilsTest do
     end
 
     test "should return a list of all files except the skipped files" do
-      files = get_all_sample_files(%Config{skip_files: ["c_sample.c"]})
+      files = get_all_sample_files(%Config{skip_patterns: [~r/c_sample\.c/]})
 
       assert files == [
                "test/sample_files/ex_sample.ex",
@@ -33,7 +33,7 @@ defmodule FilUtilsTest do
     end
 
     test "should return a list of all files except the skipped directories" do
-      files = get_all_sample_files(%Config{skip_directories: ["test/sample_files/js"]})
+      files = get_all_sample_files(%Config{skip_patterns: [~r/test\/sample_files\/js/]})
 
       assert files == [
                "test/sample_files/c_sample.c",
@@ -68,7 +68,7 @@ defmodule FilUtilsTest do
 
   describe "get_file_list_codetags/2" do
     test "should return all the configured codetags found within some files" do
-      config = %Config{skip_files: ["c_sample.c", "js_sample.js"]}
+      config = %Config{skip_patterns: [~r/c_sample\.c/, ~r/js_sample\.js/]}
       files = get_all_sample_files(config)
 
       [{"test/sample_files/ex_sample.ex", codetag_results}] =
@@ -80,7 +80,11 @@ defmodule FilUtilsTest do
     end
 
     test "should return an empty list if no codetags are found within some files" do
-      config = %Config{skip_files: ["c_sample.c", "js_sample.js"], supported_codetags: []}
+      config = %Config{
+        skip_patterns: [~r/c_sample\.c/, ~r/js_sample\.js/],
+        supported_codetags: []
+      }
+
       files = get_all_sample_files(config)
 
       results =
@@ -92,7 +96,11 @@ defmodule FilUtilsTest do
     end
 
     test "should return a list of files that only fullfil the configured codetags" do
-      config = %Config{skip_files: ["c_sample.c", "js_sample.js"], supported_codetags: ["FIXME"]}
+      config = %Config{
+        skip_patterns: [~r/c_sample\.c/, ~r/js_sample\.js/],
+        supported_codetags: ["FIXME"]
+      }
+
       files = get_all_sample_files(config)
 
       [{"test/sample_files/ex_sample.ex", codetag_results}] =

@@ -12,8 +12,7 @@ defmodule ExTodo.FileUtils do
     file_glob
     |> Path.wildcard(match_dot: true)
     |> Enum.reject(fn entry ->
-      path_in_ignore_list?(entry, config.skip_directories) or not_file?(entry) or
-        file_in_ignore_list?(entry, config.skip_files)
+      not_file?(entry) or path_in_ignore_list?(entry, config.skip_patterns)
     end)
   end
 
@@ -50,15 +49,9 @@ defmodule ExTodo.FileUtils do
     end)
   end
 
-  defp path_in_ignore_list?(path, skip_directories) do
-    Enum.find_value(skip_directories, false, fn skip_directory ->
-      String.starts_with?(path, skip_directory)
-    end)
-  end
-
-  defp file_in_ignore_list?(path, skip_files) do
-    Enum.find_value(skip_files, false, fn skip_file ->
-      String.ends_with?(path, skip_file)
+  defp path_in_ignore_list?(path, skip_patterns) do
+    Enum.find_value(skip_patterns, false, fn skip_pattern ->
+      Regex.match?(skip_pattern, path)
     end)
   end
 
